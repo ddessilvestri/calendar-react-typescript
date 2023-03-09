@@ -1,4 +1,4 @@
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 import { addHours, differenceInSeconds } from 'date-fns';
 import  Modal  from 'react-modal';
 import DatePicker, { registerLocale } from "react-datepicker";
@@ -10,6 +10,8 @@ registerLocale('es', es)
 
 
 import "react-datepicker/dist/react-datepicker.css";
+import { useUIStore } from '../../hooks';
+import { useCalendarStore } from '../../hooks/useCalendarStore';
 
 
 const customStyles = {
@@ -26,27 +28,55 @@ const customStyles = {
 Modal.setAppElement('#root');
 
 
-interface IForm {
-    title: string;
-    notes: string;
-    start: Date;
-    end: Date
-}
 
-interface ITarget {
-    name: string;
-    value: string;
-}
+interface ICalendarEvent {
+    _id: number | null;
+    title: string,
+    notes: string,
+    start: Date,
+    end: Date,
+    bgColor: string,
+    user:{
+      _id: number | null,
+      name: string | null,
+    }
+  }
+
+// interface IForm {
+//     title: string;
+//     notes: string;
+//     start: Date;
+//     end: Date
+// }
+
+// interface ITarget {
+//     name: string;
+//     value: string;
+// }
 
 export const CalendarModal = () => {
 
-    const [isOpen, setIsOpen] = useState<boolean>(true);
+    
+    const { isDateModalOpen, closeDateModal } = useUIStore()
+    const { activeEvent, startSavingEvent } = useCalendarStore()
 
-    const [formValues, setFormValues] = useState<IForm>({
-        title: 'David',
-        notes: 'Silvestri',
+    const [formValues, setFormValues] = useState<ICalendarEvent>({
+        // title: '',
+        // notes: '',
+        // start: new Date(),
+        // end: addHours( new Date(), 2 )
+
+
+        _id: null,
+        title: '',
+        notes: '',
         start: new Date(),
-        end: addHours( new Date(), 2 )
+        end: addHours( new Date(), 2 ),
+        bgColor: '#fafafa',
+        user:{
+          _id:  null,
+          name:  null,
+        }
     })  
 
     const [formSubmitted, setFormSubmitted] = useState<boolean>(false);
@@ -58,17 +88,22 @@ export const CalendarModal = () => {
              ? ''
              : 'is-invalid'
 
-        //TODO: add useRef to get focus on input when it is invalid
-
     },[formValues.title, formSubmitted])
 
 
     const inputRef = useRef<null | HTMLElement>(null);
 
     const onCloseModal = () =>{
-        console.log('cerrar modal');
-        setIsOpen(false);
+        closeDateModal();
     };
+
+
+    useEffect(() => {
+        if (activeEvent !== null){
+            setFormValues({...activeEvent});
+        }
+    }, [activeEvent])
+    
 
     const onInputChange = ({target}: React.ChangeEvent<HTMLInputElement>) => {
         setFormValues({
@@ -93,7 +128,7 @@ export const CalendarModal = () => {
         })
     }
 
-    const onSubmit = (event:React.FormEvent<HTMLFormElement>) => {
+    const onSubmit = async (event:React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         setFormSubmitted(true);
         const {start, end, title} = formValues;
@@ -107,11 +142,15 @@ export const CalendarModal = () => {
             inputRef.current?.focus();
             return;
         }
+
+        await startSavingEvent(formValues);
+        closeDateModal();
+        setFormSubmitted(false);
     }
 
   return (
     <Modal
-        isOpen={ isOpen }
+        isOpen={ isDateModalOpen }
         onRequestClose={ onCloseModal}
         style={customStyles}
         className="modal"
