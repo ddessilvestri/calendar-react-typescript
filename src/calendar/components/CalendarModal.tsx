@@ -42,31 +42,11 @@ interface ICalendarEvent {
     }
   }
 
-// interface IForm {
-//     title: string;
-//     notes: string;
-//     start: Date;
-//     end: Date
-// }
-
-// interface ITarget {
-//     name: string;
-//     value: string;
-// }
-
-export const CalendarModal = () => {
-
-    
+export const CalendarModal = () => {    
     const { isDateModalOpen, closeDateModal } = useUIStore()
     const { activeEvent, startSavingEvent } = useCalendarStore()
 
     const [formValues, setFormValues] = useState<ICalendarEvent>({
-        // title: '',
-        // notes: '',
-        // start: new Date(),
-        // end: addHours( new Date(), 2 )
-
-
         _id: null,
         title: '',
         notes: '',

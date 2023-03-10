@@ -2,7 +2,7 @@
 import { Calendar, View } from 'react-big-calendar';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-import { Navbar, CalendarEvent, CalendarModal,FabAddNew, FabDelete } from '../';
+import { Navbar, CalendarEvent, CalendarModal,FabAddNew } from '../';
 
 import { localizer, getMessagesES } from '../../helpers';
 import { useState } from 'react';
@@ -55,7 +55,7 @@ export const CalendarPage = () => {
         defaultView={lastView as any}
         startAccessor="start"
         endAccessor="end"
-        style={{ height: 'calc(100vh - 130px)' }} 
+        style={{ height: 'calc(100vh - 130px)',width:'calc(100vw - 200px)',left: '200px',position: 'relative' }} 
         messages = {getMessagesES()}
         eventPropGetter = { eventStyleGetter }
         components = {{
@@ -67,7 +67,7 @@ export const CalendarPage = () => {
         />
         <CalendarModal/>
         <FabAddNew />
-        <FabDelete/>
+      
     </>
   )
 }
